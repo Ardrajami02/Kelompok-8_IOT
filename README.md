@@ -9,3 +9,6 @@ Mengimplementasikan konsep dasar IoT menggunakan ESP8266 Melakukan monitoring su
 - Farhan Syah Putra Wiyono (23083010088)
 - Ardra Jamie Hibatullah (23083010099)
 - Muhammad Hilmy Maulana (23083010106)
+
+Hari ini Progress kelompok masih membeli sensor-sensor untuk keperluan kedepannya 
+![alt_text]()
