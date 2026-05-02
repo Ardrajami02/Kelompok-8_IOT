@@ -10,5 +10,13 @@ Mengimplementasikan konsep dasar IoT menggunakan ESP8266 Melakukan monitoring su
 - Ardra Jamie Hibatullah (23083010099)
 - Muhammad Hilmy Maulana (23083010106)
 
-Hari ini Progress kelompok masih membeli sensor-sensor untuk keperluan kedepannya 
+# Progress Hari Ini
+Hari ini Progress kelompok kami masih membeli sensor-sensor untuk keperluan kedepannya
+yang, Kelompok Kami beli yaitu:
 ![alt_text]()
+- Sensor DHT22 (Mengukur suhu dan kelembapan kandang ayam)
+- Sensor BH1750 dengan Model GY-30(Mengukur intensitas cahaya di kandang)
+- Sensor MAX4466 (Mendeteksi tingkat kebisingan di kandang)
+- Mikrokontroller ESP 32(Sebagai Otak Sistem, Mengontrol dan mengolah sistem monitoring)
+
+
