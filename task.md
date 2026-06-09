@@ -1,0 +1,4 @@
+- [ ] out: Buat aplikasi untuk menerima data http
+- [ ] iot: Perbaiki dan tambahkan http post
+- [ ] iot: Membuat sistem klasifikasi untuk pencahayaan, kelembapan, temperature, dan suara
+- [ ] iot: Perbagus Website
