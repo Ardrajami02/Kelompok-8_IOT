@@ -4,11 +4,19 @@
 <h1 align=center>IOT - Kelompok 8</h1>
 <div align="center">
   |
+  <a href="#Deskripsi-Project">Deskripsi Project</a>
+  |
   <a href="#Anggota-Kelompok">Anggota Kelompok</a>
   |
-  <a href="#Progress-Hari-Ini">Progress</a>
+  <a href="https://github.com/Ardrajami02/Kelompok-8_IOT/tree/main/progress.md">Progress</a>
+  |
+</div>
 
-Mengimplementasikan konsep dasar IoT menggunakan ESP8266 Melakukan monitoring suhu dan kelembapan secara real-time Menyediakan data berbasis web (HTTP) dan JSON Mengintegrasikan sensor, display, dan jaringan dalam satu sistem
+Mengimplementasikan konsep dasar IoT menggunakan ESP8266 Melakukan monitoring suhu dan kelembapan secara real-time Menyediakan data berbasis web
+(HTTP) dan JSON Mengintegrasikan sensor, display, dan jaringan dalam satu sistem
+
+## Deskripsi Project
+Gelo Ipsum
 
 ## Anggota Kelompok
 - M. Nurhadyatullah Kusharyadi  (23083010049)
@@ -16,13 +24,3 @@ Mengimplementasikan konsep dasar IoT menggunakan ESP8266 Melakukan monitoring su
 - Farhan Syah Putra Wiyono (23083010088)
 - Ardra Jamie Hibatullah (23083010099)
 - Muhammad Hilmy Maulana (23083010106)
-
-## Progress Hari Ini
-Hari ini Progress kelompok kami masih membeli sensor-sensor untuk keperluan kedepannya
-yang, Kelompok Kami beli yaitu:
-- Sensor DHT22 (Mengukur suhu dan kelembapan kandang ayam)
-- Sensor BH1750 dengan Model GY-30(Mengukur intensitas cahaya di kandang)
-- Sensor MAX4466 (Mendeteksi tingkat kebisingan di kandang)
-- Mikrokontroller ESP 32(Sebagai Otak Sistem, Mengontrol dan mengolah sistem monitoring)
-
-
