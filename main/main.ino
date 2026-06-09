@@ -1,0 +1,66 @@
+// Name: main.ino
+// Desc: Files arduino eas matkul iot
+// Auth: KillingWhales
+
+#define BUILTINLEDPINOUT 2
+#define DHTPIN 4 //HUM gpio4
+#define MAX4466_PIN 34 //SOUND gpio34
+#define BH1750SDA_PIN 21 //LIGHT gpio21
+#define BH1750SCL_PIN 22 //LIGHT gpio22
+
+#include <Wire.h>
+#include <DHT.h>
+#include <BH1750.h>
+
+
+// Fungsi untuk blink dengan cepat berdasarkan amount
+#define gettingToBlinky(amount, spd) for(int i = 0;i < amount;i++){\
+    digitalWrite(BUILTINLEDPINOUT, HIGH);\
+    delay(spd);\
+    digitalWrite(BUILTINLEDPINOUT, LOW);\
+    delay(spd);\
+}
+
+// Macros Expansion untuk init semua sensor
+#define initAllLib(dht_loc, bh1750_loc) dht_loc.begin(); Wire.begin(BH1750SDA_PIN, BH1750SCL_PIN)
+
+DHT hum(DHTPIN, DHT22);
+BH1750 light;
+
+void
+setup() {
+  pinMode(BUILTINLEDPINOUT, OUTPUT); // LED BLINK / gettingToBlinky
+  Serial.begin(9600);
+  initAllLib(hum, light);
+  if (light.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
+    Serial.println("BH1750 OK");
+  } else {
+    Serial.println("BH1750 FAILED");
+  }
+}
+
+void
+loop() {
+  int micval = analogRead(MAX4466_PIN);
+  float humval = hum.readHumidity();
+  float tempval = hum.readTemperature();
+  float luxval = light.readLightLevel();
+
+  // if (micval && humval && tempval && luxval){
+  //   // gettingToBlinky(3, 50);
+  //   Serial.println("-----");
+  //   Serial.print("Temp: ");
+  //   Serial.print(tempval);
+  //   Serial.println(" C");
+  //   Serial.print("Humidity: ");
+  //   Serial.print(humval);
+  //   Serial.println(" %");
+  //   Serial.print("Light: ");
+  //   Serial.print(luxval);
+  //   Serial.println(" lux");
+  //   Serial.print("Sound: ");
+  //   Serial.println(micval);
+  // }
+
+  delay(1000);
+}
