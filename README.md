@@ -12,11 +12,11 @@
   |
 </div>
 
-Mengimplementasikan konsep dasar IoT menggunakan ESP8266 Melakukan monitoring suhu dan kelembapan secara real-time Menyediakan data berbasis web
-(HTTP) dan JSON Mengintegrasikan sensor, display, dan jaringan dalam satu sistem
 
 ## Deskripsi Project
-Gelo Ipsum
+Project UAS Iot untuk merekam tingkat kesenangan ternak
+
+![Video Iot](https://github.com/Ardrajami02/Kelompok-8_IOT/blob/main/video.mp4)
 
 ## Anggota Kelompok
 - M. Nurhadyatullah Kusharyadi  (23083010049)
