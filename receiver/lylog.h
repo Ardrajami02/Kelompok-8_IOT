@@ -28,8 +28,11 @@
 #define LYM_SETLOGCOLOR(e, c) c,
 
 typedef enum { LYM_SETLOG(LYM_SETLOGENUM) } LYLOGE_LOGTYPE;
+
+#ifndef LY_BUILD_MODE
 static const char* LYGC_LOGMSG[] = {LYM_SETLOG(LYM_SETLOGENUMSTR)};
 static const char* LYGC_LOGCOLORS[] = {LYM_SETLOG(LYM_SETLOGCOLOR)};
+#endif
 
 // DISABLE DEBUG
 #ifndef LY_BUILD_MODE

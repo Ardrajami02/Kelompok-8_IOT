@@ -1,8 +1,13 @@
+// External Library
 #include <curl/curl.h>
+
+// STD C
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
+// Non Multi Platform
 #include <unistd.h>
 
 #define ___LYLOG_IMP___
@@ -21,10 +26,19 @@ typedef struct {
   size_t size;
 } HttpBuffer;
 
+typedef struct {
+  double tempval;
+  double humval;
+  double lightval;
+  double micval;
+} SensorValue;
+
 int
 handle_curl(ConfigVal* conf);
 void
 handle_input(int argc, char** argv, ConfigVal* conf);
+int
+create_databases(SensorValue sens);
 
 int
 main(int argc, char** argv) {
@@ -59,6 +73,8 @@ write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
 int
 handle_curl(ConfigVal* conf) {
   CURL* curl = curl_easy_init();
+  SensorValue sens = {};
+
   while (conf->ammount) {
 
     if (!curl)
@@ -96,20 +112,11 @@ handle_curl(ConfigVal* conf) {
         printf("humid : %.2f\n", values[1]);
         printf("light : %.2f\n", values[2]);
         printf("sound : %.2f\n", values[3]);
-      }
-      FILE* f = fopen("output.txt", "w");
-
-      if (f) {
-        fprintf(f,
-
-                "%f\n"
-                "%f\n"
-                "%f\n"
-                "%f\n",
-
-                values[0], values[1], values[2], values[3]);
-
-        fclose(f);
+        sens.tempval = values[0];
+        sens.humval = values[1];
+        sens.lightval = values[2];
+        sens.micval = values[3];
+        create_databases(sens);
       }
     }
 
@@ -123,7 +130,28 @@ handle_curl(ConfigVal* conf) {
 }
 
 int
-create_databases() {
+create_databases(SensorValue sens) {
+  FILE* outputfile = fopen("output.csv", "a+");
+  if (!outputfile) {
+    lym_printlog(ERROR, "gagal membuka csv");
+    return -1;
+  }
+
+  fseek(outputfile, 0, SEEK_END);
+  long sz = ftell(outputfile);
+  if (sz == 0) {
+    fprintf(outputfile, "times,temp,humidity,light,sound\n");
+  }
+  time_t nw = time(NULL);
+  struct tm* tm = localtime(&nw);
+  char timestr[64];
+
+  strftime(timestr, sizeof(timestr), "%H:%M:%S %d-%m-%Y", tm);
+  fprintf(outputfile, "%s,%.2f,%.2f,%.2f,%.2f\n", timestr, sens.tempval,
+          sens.humval, sens.lightval, sens.micval);
+
+  fclose(outputfile);
+
   return 0;
 }
 
