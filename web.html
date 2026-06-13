@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="refresh" content="10" />
   <title>Kelompok 8 – IoT : Peternakan Hewan</title>
 
   <!-- Google Fonts: Space Grotesk for techy-farmtech feel -->
@@ -42,7 +41,6 @@
       padding: 20px 16px 32px;
     }
 
-    /* ─── HEADER ────────────────────────────────────────────── */
     .header {
       display: flex;
       justify-content: space-between;
@@ -83,6 +81,26 @@
     }
     .icon-btn:hover { background: var(--surface1); }
     .icon-btn svg { width: 18px; height: 18px; }
+
+    .inputtext{
+      background: var(--surface0);
+      color: var(--text);
+      font-family: inherit;
+      width: 210px;
+      height: 40px;
+      border: 0.5px solid var(--surface1);
+      outline: none;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .inputtext::placeholder {
+      color: var(--overlay0);
+    }
+
+    .inputtext:focus {
+      border-color: var(--blue);
+    }
 
     /* ─── SENSOR CARDS GRID ─── */
     .cards-grid {
@@ -295,11 +313,12 @@
   </div>
   <div class="header-right">
     <!-- Download icon -->
-    <button class="icon-btn" title="Download data" onclick="downloadData()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-    </button>
+    <input type="text" class="inputtext" id="sens-address" placeholder="http://192.168.x.150">
+    <!-- <button class="icon-btn" title="Download data" onclick="downloadData()"> -->
+    <!--   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> -->
+    <!--     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/> -->
+    <!--   </svg> -->
+    <!-- </button> -->
     <!-- Settings icon -->
     <button class="icon-btn" title="Pengaturan threshold" onclick="toggleSettings()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -544,13 +563,56 @@ const SENSORS = {
      const r = await fetch('http://192.168.x.x/data');
      const d = await r.json();   // {temp:36, hum:62, light:230, sound:55}
    ──────────────────────────────────────────────────────────── */
+const addrInput =
+document.getElementById(
+  'sens-address'
+);
+
+let sensorAddress =
+addrInput.value.trim();
+
+addrInput.addEventListener(
+'input',
+(e)=>{
+  sensorAddress =
+  e.target.value.trim();
+
+  console.log(
+    'ADDR:',
+    sensorAddress
+  );
+});
+
 async function readSensor() {
-  // SIMULASI – hapus baris ini dan ganti dengan fetch() ke sensor nyata
+  console.log('readSensor Start');
+  if (!sensorAddress) {
+    console.log('readSensor Start2');
+    throw new Error('alamat kosong');
+  }
+  console.log('readSensor Start3');
+  const response = await fetch(sensorAddress);
+  console.log('readSensor Start4');
+  if (!response.ok) throw new Error('http gagal');
+  const raw =(await response.text()).trim();
+  console.log('RAW:',raw);
+  const values =raw.split(',');
+
+  if (values.length !== 4)
+  {
+    throw new Error(
+      'format salah');
+  }
+
+  console.log('readSensor Ene');
   return {
-    temp:  parseFloat((35 + Math.random() * 10).toFixed(1)),
-    hum:   parseFloat((40 + Math.random() * 40).toFixed(1)),
-    light: Math.round(50 + Math.random() * 600),
-    sound: Math.round(40 + Math.random() * 60),
+    temp:
+      parseFloat(values[0]),
+    hum:
+      parseFloat(values[1]),
+    light:
+      parseFloat(values[2]),
+    sound:
+      parseFloat(values[3]),
   };
 }
 
@@ -565,12 +627,12 @@ function getStatus(key, value) {
 function updateParameterBar(key, value) {
   const [low, mid] = SENSORS[key].thresholds;
   const max = mid * 1.5; // extended max untuk visualisasi
-  
+
   // Update bar width
   const percentage = Math.min((value / max) * 100, 100);
   const barEl = document.getElementById(`param-${key}-bar`);
   if (barEl) barEl.style.width = percentage + '%';
-  
+
   // Update status label
   const statusLabel = document.getElementById(`param-${key}-label`);
   if (statusLabel) statusLabel.textContent = getStatus(key, value);
@@ -591,7 +653,7 @@ async function updateDashboard() {
     const display = (val !== undefined && !isNaN(val)) ? val : '--';
     document.getElementById('val-'+key).textContent = display;
     document.getElementById('status-'+key).textContent = getStatus(key, val);
-    
+
     // Update parameter bar if value is valid
     if (val !== undefined && !isNaN(val)) {
       updateParameterBar(key, val);
@@ -645,7 +707,7 @@ function saveThresholds() {
     const mid = parseFloat(document.getElementById('thr-'+key+'-mid').value);
     if (!isNaN(low) && !isNaN(mid) && low < mid) {
       SENSORS[key].thresholds = [low, mid];
-      
+
       // Update threshold display on cards
       const unit = SENSORS[key].unit;
       document.getElementById(`param-${key}-min`).textContent = low + unit;
@@ -656,18 +718,6 @@ function saveThresholds() {
   updateDashboard();
 }
 
-/* ─── DOWNLOAD CSV ─────────────────────────────────────────────── */
-const history = [];
-async function downloadData() {
-  if (history.length === 0) { alert('Belum ada data terkumpul.'); return; }
-  const csv = ['Waktu,Suhu(°C),Kelembapan(%),Cahaya(lux),Suara(dB)']
-    .concat(history.map(r => `${r.time},${r.temp},${r.hum},${r.light},${r.sound}`))
-    .join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = 'data_sensor_kelompok8.csv';
-  a.click();
-}
 
 /* ─── INIT ──────────────────────────────────────────────────────── */
 (async () => {
@@ -682,8 +732,6 @@ async function downloadData() {
       light: document.getElementById('val-light').textContent,
       sound: document.getElementById('val-sound').textContent,
     };
-    history.push(vals);
-    if (history.length > 200) history.shift(); // batas buffer
   }, 10000);
 })();
 </script>
