@@ -8,7 +8,11 @@
 #include <time.h>
 
 // Non Multi Platform
+#ifdef __linux__
 #include <unistd.h>
+#else
+#include <windows.h>
+#endif
 
 #define ___LYLOG_IMP___
 #include "lylog.h"
@@ -123,7 +127,11 @@ handle_curl(ConfigVal* conf) {
     free(response.data);
 
     --conf->ammount;
+    #ifdef __linux__
     sleep(conf->intervalt);
+    #else
+    Sleep(conf->intervalt * 1000);
+    #endif
   }
   curl_easy_cleanup(curl);
   return 0;
