@@ -28,3 +28,5 @@ https://github.com/user-attachments/assets/031d34d4-ee5d-465b-b91f-63c68c3c2707
 - Farhan Syah Putra Wiyono (23083010088)
 - Ardra Jamie Hibatullah (23083010099)
 - Muhammad Hilmy Maulana (23083010106)
+
+## Diskusi Projek Kandang Ayam diLamongan
