@@ -1,3 +1,5 @@
+# 14-06-2026
+-   Melakukan pengambilan data di peternakan ayam Lamongan
 # 09-06-2026
 -   Terdapat error / short circuit pada bh1750 di pin scl
 -   DHT22 pin memberikan nilai Nan
