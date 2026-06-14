@@ -27,6 +27,9 @@
 #define LYM_SETLOGENUMSTR(e, c) #e,
 #define LYM_SETLOGCOLOR(e, c) c,
 
+// update if c23
+#include <stdbool.h>
+
 typedef enum { LYM_SETLOG(LYM_SETLOGENUM) } LYLOGE_LOGTYPE;
 
 #ifndef LY_BUILD_MODE

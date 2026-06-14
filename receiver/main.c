@@ -23,6 +23,7 @@ typedef struct {
   int intervalt;
   StaStrings connection;
   int ammount;
+  char* outputname;
 } ConfigVal;
 
 typedef struct {
@@ -37,12 +38,14 @@ typedef struct {
   double micval;
 } SensorValue;
 
+
+// Forward Decl
 int
 handle_curl(ConfigVal* conf);
 void
 handle_input(int argc, char** argv, ConfigVal* conf);
 int
-create_databases(SensorValue sens);
+create_databases(SensorValue sens, char* name);
 
 int
 main(int argc, char** argv) {
@@ -55,6 +58,7 @@ main(int argc, char** argv) {
          conf.connection.arr);
   printf("conf interval: %d\n", conf.intervalt);
   printf("conf ammount: %d\n", conf.ammount);
+  printf("conf names: %s\n", conf.outputname);
 
   handle_curl(&conf);
 }
@@ -120,7 +124,7 @@ handle_curl(ConfigVal* conf) {
         sens.humval = values[1];
         sens.lightval = values[2];
         sens.micval = values[3];
-        create_databases(sens);
+        create_databases(sens, conf->outputname);
       }
     }
 
@@ -138,8 +142,8 @@ handle_curl(ConfigVal* conf) {
 }
 
 int
-create_databases(SensorValue sens) {
-  FILE* outputfile = fopen("output.csv", "a+");
+create_databases(SensorValue sens, char* namae) {
+  FILE* outputfile = fopen(namae, "a+");
   if (!outputfile) {
     lym_printlog(ERROR, "gagal membuka csv");
     return -1;
@@ -183,6 +187,9 @@ handle_input(int argc, char** argv, ConfigVal* conf) {
       } else if (strcmp(argv[i], "--ammount") == 0) {
         ++i;
         conf->ammount = strtol(argv[i], &endl, 10);
+      } else if (strcmp(argv[i], "--output") == 0) {
+	++i;
+	conf->outputname = argv[i];
       } else {
         lym_printlog(
             ERROR,
@@ -195,5 +202,8 @@ handle_input(int argc, char** argv, ConfigVal* conf) {
       StaStringsNew(&conf->connection, argv[i]);
     }
     ++i;
+  }
+  if (conf->outputname == NULL){
+	conf->outputname = "output.csv";
   }
 }
