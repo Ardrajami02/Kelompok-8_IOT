@@ -702,29 +702,37 @@ addrInput.addEventListener(
   );
 });
 
-const addrInput = document.getElementById("sens-address");
-
 async function readSensor() {
+  console.log('readSensor Start');
+  if (!sensorAddress) {
+    console.log('readSensor Start2');
+    throw new Error('alamat kosong');
+  }
+  console.log('readSensor Start3');
+  const response = await fetch(sensorAddress);
+  console.log('readSensor Start4');
+  if (!response.ok) throw new Error('http gagal');
+  const raw =(await response.text()).trim();
+  console.log('RAW:',raw);
+  const values =raw.split(',');
 
-    const sensorAddress = addrInput.value.trim();
-    if (!sensorAddress) {
-        throw new Error("alamat kosong");
-    }
-    const response = await fetch(sensorAddress);
-    if (!response.ok) {
-        throw new Error("http gagal");
-    }
-    const raw = (await response.text()).trim();
-    const values = raw.split(",");
-    if (values.length !== 4) {
-        throw new Error("format salah");
-    }
-    return {
-        temp: parseFloat(values[0]),
-        hum: parseFloat(values[1]),
-        light: parseFloat(values[2]),
-        sound: parseFloat(values[3]),
-    };
+  if (values.length !== 4)
+  {
+    throw new Error(
+      'format salah');
+  }
+
+  console.log('readSensor Ene');
+  return {
+    temp:
+      parseFloat(values[0]),
+    hum:
+      parseFloat(values[1]),
+    light:
+      parseFloat(values[2]),
+    sound:
+      parseFloat(values[3]),
+  };
 }
 
 function getStatus(key, value) {
@@ -1023,7 +1031,19 @@ function downloadDataAsCSV() {
     addToHistory(data);
     
     await updateDashboard();
+<<<<<<< HEAD
+    // simpan riwayat untuk export CSV
+    const vals = {
+      time: new Date().toLocaleTimeString('id-ID'),
+      temp:  document.getElementById('val-temp').textContent,
+      hum:   document.getElementById('val-hum').textContent,
+      light: document.getElementById('val-light').textContent,
+      sound: document.getElementById('val-sound').textContent,
+    };
   }, 1);
+=======
+  }, 150);
+>>>>>>> refs/remotes/origin/main
 })();
 </script>
 </body>
