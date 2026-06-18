@@ -705,7 +705,6 @@ addrInput.addEventListener(
 const addrInput = document.getElementById("sens-address");
 
 async function readSensor() {
-
     const sensorAddress = addrInput.value.trim();
     if (!sensorAddress) {
         throw new Error("alamat kosong");
@@ -726,7 +725,6 @@ async function readSensor() {
         sound: parseFloat(values[3]),
     };
 }
-
 function getStatus(key, value) {
   const [low, mid] = SENSORS[key].thresholds;
   if (value === null || value === undefined || isNaN(value)) return 'Tidak Ada Nilai';
