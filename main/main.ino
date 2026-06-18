@@ -32,8 +32,12 @@
 
 // // GLOBAL VAR // //
 
+/*
 const char* GC_WINAME[] = {"HOTSPOT@UPNJATIM.AC.ID"}; // tambahkan wifi terus, beserta dengan pwnya
 const char* GC_WIPASSWORD[] = {"belanegara"};
+*/
+const char* GC_WINAME[] = {"Alvhim"}; // tambahkan wifi terus, beserta dengan pwnya
+const char* GC_WIPASSWORD[] = {"tahukotak"};
 
 // IPAddress staticIP(172, 27, 205, 150);
 // IPAddress gateway(172, 27, 205, 1);
