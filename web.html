@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelompok 8 – IoT : Peternakan Hewan</title>
+
+  <!-- Google Fonts: Space Grotesk for techy-farmtech feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+
+  <style>
+    :root {
+      --base:   #1e1e2e;
+      --mantle: #181825;
+      --surface0: #313244;
+      --surface1: #45475a;
+      --overlay0: #6c7086;
+      --text:   #cdd6f4;          /* card-1 border / main text */
+      --subtext:#a6adc8;
+
+      --lavender:#b4befe;         /* humidity / card-2 */
+      --pink:    #f38ba8;         /* temperature / card-1 */
+      --yellow:  #f9e2af;         /* light / card-3 */
+      --green:   #a6e3a1;         /* sound / card-4 */
+      --blue:    #89b4fa;
+      --mauve:   #cba6f7;
+
+      --radius-card: 18px;
+      --radius-badge: 12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Space Grotesk', Arial, sans-serif;
+      background-color: var(--base);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 16px 32px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+      gap: 12px;
+    }
+    .header-left h1 {
+      font-size: clamp(1.5rem, 5vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+    .header-left .subtitle {
+      margin-top: 6px;
+      font-size: clamp(0.65rem, 2vw, 0.8rem);
+      color: var(--subtext);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      max-width: 320px;
+    }
+    .header-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .icon-btn {
+      background: var(--surface0);
+      border: none;
+      border-radius: 10px;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.2s;
+    }
+    .icon-btn:hover { background: var(--surface1); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    .inputtext{
+      background: var(--surface0);
+      color: var(--text);
+      font-family: inherit;
+      width: 210px;
+      height: 40px;
+      border: 0.5px solid var(--surface1);
+      outline: none;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .inputtext::placeholder {
+      color: var(--overlay0);
+    }
+
+    .inputtext:focus {
+      border-color: var(--blue);
+    }
+
+    /* ─── SENSOR CARDS GRID ─── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    @media (min-width: 700px) {
+      .cards-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .sensor-card {
+      background: var(--mantle);
+      border-radius: var(--radius-card);
+      border: 2.5px solid;
+      padding: 16px 14px 14px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s;
+    }
+    .sensor-card:hover { transform: translateY(-2px); }
+
+    .sensor-card.temp  { border-color: var(--pink);    }
+    .sensor-card.hum   { border-color: var(--lavender);}
+    .sensor-card.light { border-color: var(--yellow);  }
+    .sensor-card.sound { border-color: var(--green);   }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .card-icon {
+      width: 28px; height: 28px;
+      flex-shrink: 0;
+    }
+    .card-label {
+      font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--subtext);
+    }
+    .card-value {
+      font-size: clamp(2.2rem, 8vw, 3.4rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .card-unit {
+      font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+      font-weight: 600;
+      color: var(--subtext);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .sensor-card.temp  .card-value { color: var(--pink);    }
+    .sensor-card.hum   .card-value { color: var(--lavender);}
+    .sensor-card.light .card-value { color: var(--yellow);  }
+    .sensor-card.sound .card-value { color: var(--green);   }
+
+    /* ─── PARAMETER INDICATORS ─ */
+    .card-parameters {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--surface0);
+    }
+
+    .parameter-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .parameter-bar-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--subtext);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--surface0);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      background: linear-gradient(90deg, #89b4fa, #cba6f7);
+    }
+
+    .sensor-card.temp  .progress-fill  { background: linear-gradient(90deg, #f38ba8, #f9e2af); }
+    .sensor-card.hum   .progress-fill  { background: linear-gradient(90deg, #b4befe, #89b4fa); }
+    .sensor-card.light .progress-fill  { background: linear-gradient(90deg, #f9e2af, #a6e3a1); }
+    .sensor-card.sound .progress-fill  { background: linear-gradient(90deg, #a6e3a1, #89b4fa); }
+
+    .threshold-range {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.6rem;
+      color: var(--overlay0);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .parameter-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .sensor-card.temp  .status-dot { background: var(--pink);    }
+    .sensor-card.hum   .status-dot { background: var(--lavender);}
+    .sensor-card.light .status-dot { background: var(--yellow);  }
+    .sensor-card.sound .status-dot { background: var(--green);   }
+
+    /* ─── STATUS BADGES GRID ────────────────────────────────── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 700px) {
+      .status-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .status-badge {
+      border-radius: var(--radius-badge);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(0.75rem, 2.5vw, 1rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-badge svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    .status-badge.temp  { background: rgba(243,139,168,0.15); color: var(--pink);    }
+    .status-badge.hum   { background: rgba(180,190,254,0.15); color: var(--lavender);}
+    .status-badge.light { background: rgba(249,226,175,0.15); color: var(--yellow);  }
+    .status-badge.sound { background: rgba(166,227,161,0.15); color: var(--green);   }
+
+    /* ─── FOOTER ────────────────────────────────────────────── */
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--overlay0);
+      letter-spacing: 0.06em;
+    }
+    .footer span { color: var(--subtext); }
+
+    /* ─── LIVE PULSE DOT ────────────────────────────────────── */
+    .live-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ─── DIVIDER ───────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--surface0);
+      margin: 14px 0;
+    }
+
+    /* ─── CHARTS SECTION ────────────────────────────────────── */
+    .charts-section {
+      margin-top: 28px;
+    }
+
+    .charts-section h2 {
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-container {
+      background: var(--mantle);
+      border: 2.5px solid var(--surface0);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      position: relative;
+    }
+
+    .chart-container canvas {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* ─── DOWNLOAD BUTTON ──────────────────────────────────── */
+    .download-btn {
+      background: linear-gradient(135deg, #89b4fa 0%, #cba6f7 100%);
+      color: var(--base);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s;
+      margin-top: 14px;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(137, 180, 250, 0.4);
+    }
+
+    .download-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-left">
+    <h1>Kelompok 8<br/>IoT – Peternakan</h1>
+    <p class="subtitle">Monitoring sensor kandang secara real-time.<br/>Data diperbarui setiap 10 detik.</p>
+  </div>
+  <div class="header-right">
+    <!-- Download icon -->
+    <input type="text" class="inputtext" id="sens-address" placeholder="http://192.168.x.150">
+    <!-- <button class="icon-btn" title="Download data" onclick="downloadData()"> -->
+    <!--   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"> -->
+    <!--     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/> -->
+    <!--   </svg> -->
+    <!-- </button> -->
+    <!-- Settings icon -->
+    <button class="icon-btn" title="Pengaturan threshold" onclick="toggleSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── SENSOR VALUE CARDS ────────────────────────────────────── -->
+<div class="cards-grid">
+
+  <!-- Temperature -->
+  <div class="sensor-card temp">
+    <div class="card-header">
+      <!-- thermometer icon -->
+      <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#f38ba8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/>
+      </svg>
+      <span class="card-label">Suhu</span>
+    </div>
+    <div class="card-value" id="val-temp">--</div>
+    <div class="card-unit">°C · Celsius</div>
+    <div class="card-parameters">
+      <div class="parameter-bar">
+        <div class="parameter-bar-label">
+          <span>Range</span>
+          <span id="param-temp-status" class="parameter-status">
+            <span class="status-dot"></span>
+            <span id="param-temp-label">--</span>
+          </span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="param-temp-bar" style="width: 0%"></div>
+        </div>
+        <div class="threshold-range">
+          <span id="param-temp-min">0°C</span>
+          <span id="param-temp-max">50°C</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Humidity -->
+  <div class="sensor-card hum">
+    <div class="card-header">
+      <!-- droplet icon -->
+      <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#b4befe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>
+      </svg>
+      <span class="card-label">Kelembapan</span>
+    </div>
+    <div class="card-value" id="val-hum">--</div>
+    <div class="card-unit">% · Humidity</div>
+    <div class="card-parameters">
+      <div class="parameter-bar">
+        <div class="parameter-bar-label">
+          <span>Range</span>
+          <span id="param-hum-status" class="parameter-status">
+            <span class="status-dot"></span>
+            <span id="param-hum-label">--</span>
+          </span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="param-hum-bar" style="width: 0%"></div>
+        </div>
+        <div class="threshold-range">
+          <span id="param-hum-min">0%</span>
+          <span id="param-hum-max">100%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Light -->
+  <div class="sensor-card light">
+    <div class="card-header">
+      <!-- bulb icon -->
+      <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#f9e2af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/>
+        <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/>
+      </svg>
+      <span class="card-label">Cahaya</span>
+    </div>
+    <div class="card-value" id="val-light">--</div>
+    <div class="card-unit">lux</div>
+    <div class="card-parameters">
+      <div class="parameter-bar">
+        <div class="parameter-bar-label">
+          <span>Range</span>
+          <span id="param-light-status" class="parameter-status">
+            <span class="status-dot"></span>
+            <span id="param-light-label">--</span>
+          </span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="param-light-bar" style="width: 0%"></div>
+        </div>
+        <div class="threshold-range">
+          <span id="param-light-min">0 lux</span>
+          <span id="param-light-max">1000 lux</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sound -->
+  <div class="sensor-card sound">
+    <div class="card-header">
+      <!-- volume icon -->
+      <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="#a6e3a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/>
+      </svg>
+      <span class="card-label">Suara</span>
+    </div>
+    <div class="card-value" id="val-sound">--</div>
+    <div class="card-unit">dB</div>
+    <div class="card-parameters">
+      <div class="parameter-bar">
+        <div class="parameter-bar-label">
+          <span>Range</span>
+          <span id="param-sound-status" class="parameter-status">
+            <span class="status-dot"></span>
+            <span id="param-sound-label">--</span>
+          </span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="param-sound-bar" style="width: 0%"></div>
+        </div>
+        <div class="threshold-range">
+          <span id="param-sound-min">0 dB</span>
+          <span id="param-sound-max">100 dB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- ── STATUS BADGES ────-->
+<div class="status-grid">
+
+  <div class="status-badge temp">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/>
+    </svg>
+    <span id="status-temp">Memuat…</span>
+  </div>
+
+  <div class="status-badge hum">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>
+    </svg>
+    <span id="status-hum">Memuat…</span>
+  </div>
+
+  <div class="status-badge light">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/>
+      <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/>
+    </svg>
+    <span id="status-light">Memuat…</span>
+  </div>
+
+  <div class="status-badge sound">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <path d="M15.54 8.46a5 5 0 010 7.07"/>
+    </svg>
+    <span id="status-sound">Memuat…</span>
+  </div>
+
+</div>
+
+</div>
+
+<!-- ── CHARTS SECTION ─────────────────────────────────────────── -->
+<div class="charts-section">
+  <h2>Grafik Sensor</h2>
+  
+  <div class="charts-grid">
+    <div class="chart-container">
+      <canvas id="chartTemp"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartHum"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartLight"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="chartSound"></canvas>
+    </div>
+  </div>
+
+  <button class="download-btn" onclick="downloadDataAsCSV()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Download CSV
+  </button>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<div class="footer">
+  <span class="live-dot"></span>
+  Live · diperbarui setiap 10 detik &nbsp;|&nbsp;
+  Terakhir: <span id="last-update">–</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  THRESHOLD SETTINGS PANEL (hidden by default)              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="settings-panel" style="
+  display:none;
+  position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.6);
+  z-index:100;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    background:var(--mantle);
+    border-radius:20px;
+    padding:28px 24px;
+    width:min(92vw, 420px);
+    border:1.5px solid var(--surface1);
+  ">
+    <h2 style="font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px;">
+       Atur Threshold Sensor
+    </h2>
+
+    <div id="threshold-form"></div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button onclick="saveThresholds()" style="
+        flex:1;background:var(--lavender);color:var(--base);
+        border:none;border-radius:10px;padding:12px;
+        font-family:inherit;font-weight:700;font-size:.9rem;cursor:pointer;
+      ">Simpan</button>
+      <button onclick="toggleSettings()" style="
+        flex:1;background:var(--surface0);color:var(--text);
+        border:none;border-radius:10px;padding:12px;
+        font-family:inherit;font-weight:700;font-size:.9rem;cursor:pointer;
+      ">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SCRIPT: sensor config + status logic                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script>
+/* ─── SENSOR CONFIGURATION ─────────────────────────────────────
+   Sesuaikan nilai di sini agar cocok dengan sensor yang kamu pakai.
+   thresholds: [ rendah_maks, sedang_maks ]  → ≤low=Rendah, ≤mid=Sedang, else=Tinggi
+   ──────────────────────────────────────────────────────────── */
+const SENSORS = {
+  temp:  { label: 'Suhu',       unit: '°C', thresholds: [30, 38] },
+  hum:   { label: 'Kelembapan', unit: '%',  thresholds: [40, 70] },
+  light: { label: 'Cahaya',     unit: 'lux',thresholds: [100, 500] },
+  sound: { label: 'Suara',      unit: 'dB', thresholds: [50, 80] },
+};
+
+/* ─── HISTORICAL DATA STORAGE ──────────────────────────────────── */
+const MAX_DATA_POINTS = 144; // Simpan 24 jam data (per 10 detik)
+const sensorHistory = {
+  labels: [],
+  temp: [],
+  hum: [],
+  light: [],
+  sound: []
+};
+
+const CHART_COLORS = {
+  temp:  { border: '#f38ba8', bg: 'rgba(243, 139, 168, 0.1)' },
+  hum:   { border: '#b4befe', bg: 'rgba(180, 190, 254, 0.1)' },
+  light: { border: '#f9e2af', bg: 'rgba(249, 226, 175, 0.1)' },
+  sound: { border: '#a6e3a1', bg: 'rgba(166, 227, 161, 0.1)' }
+};
+
+let chartTemp, chartHum, chartLight, chartSound;
+
+/* ─── SIMULATED LIVE DATA ───────────────────────────────────────
+   Ganti fungsi readSensor() dengan pembacaan nyata dari
+   endpoint ESP32 / Node-RED / MQTT over HTTP milik kamu.
+   Contoh fetch:
+     const r = await fetch('http://192.168.x.x/data');
+     const d = await r.json();   // {temp:36, hum:62, light:230, sound:55}
+   ──────────────────────────────────────────────────────────── */
+const addrInput =
+document.getElementById(
+  'sens-address'
+);
+
+let sensorAddress =
+addrInput.value.trim();
+
+addrInput.addEventListener(
+'input',
+(e)=>{
+  sensorAddress =
+  e.target.value.trim();
+
+  console.log(
+    'ADDR:',
+    sensorAddress
+  );
+});
+
+const addrInput = document.getElementById("sens-address");
+
+async function readSensor() {
+
+    const sensorAddress = addrInput.value.trim();
+    if (!sensorAddress) {
+        throw new Error("alamat kosong");
+    }
+    const response = await fetch(sensorAddress);
+    if (!response.ok) {
+        throw new Error("http gagal");
+    }
+    const raw = (await response.text()).trim();
+    const values = raw.split(",");
+    if (values.length !== 4) {
+        throw new Error("format salah");
+    }
+    return {
+        temp: parseFloat(values[0]),
+        hum: parseFloat(values[1]),
+        light: parseFloat(values[2]),
+        sound: parseFloat(values[3]),
+    };
+}
+
+function getStatus(key, value) {
+  const [low, mid] = SENSORS[key].thresholds;
+  if (value === null || value === undefined || isNaN(value)) return 'Tidak Ada Nilai';
+  if (value <= low)  return 'Rendah';
+  if (value <= mid)  return 'Sedang';
+  return 'Tinggi';
+}
+
+function updateParameterBar(key, value) {
+  const [low, mid] = SENSORS[key].thresholds;
+  const max = mid * 1.5; // extended max untuk visualisasi
+
+  // Update bar width
+  const percentage = Math.min((value / max) * 100, 100);
+  const barEl = document.getElementById(`param-${key}-bar`);
+  if (barEl) barEl.style.width = percentage + '%';
+
+  // Update status label
+  const statusLabel = document.getElementById(`param-${key}-label`);
+  if (statusLabel) statusLabel.textContent = getStatus(key, value);
+}
+
+async function updateDashboard() {
+  let data;
+  try { data = await readSensor(); }
+  catch(e) {
+    ['temp','hum','light','sound'].forEach(k => {
+      document.getElementById('status-'+k).textContent = 'Error koneksi';
+    });
+    return;
+  }
+
+  ['temp','hum','light','sound'].forEach(key => {
+    const val = data[key];
+    const display = (val !== undefined && !isNaN(val)) ? val : '--';
+    document.getElementById('val-'+key).textContent = display;
+    document.getElementById('status-'+key).textContent = getStatus(key, val);
+
+    // Update parameter bar if value is valid
+    if (val !== undefined && !isNaN(val)) {
+      updateParameterBar(key, val);
+    }
+  });
+
+  const now = new Date();
+  document.getElementById('last-update').textContent =
+    now.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+/* ─── SETTINGS PANEL ──────────────────────────────────────────── */
+function buildThresholdForm() {
+  const form = document.getElementById('threshold-form');
+  form.innerHTML = Object.entries(SENSORS).map(([key, cfg]) => `
+    <div style="margin-bottom:16px;">
+      <p style="font-size:.78rem;font-weight:700;text-transform:uppercase;
+                letter-spacing:.08em;color:var(--subtext);margin-bottom:8px;">
+        ${cfg.label} (${cfg.unit})
+      </p>
+      <div style="display:flex;gap:10px;">
+        <label style="flex:1;font-size:.75rem;color:var(--subtext);">
+          Batas Rendah
+          <input id="thr-${key}-low" type="number" value="${cfg.thresholds[0]}"
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;
+                   background:var(--surface0);border:1.5px solid var(--surface1);
+                   border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem;" />
+        </label>
+        <label style="flex:1;font-size:.75rem;color:var(--subtext);">
+          Batas Sedang
+          <input id="thr-${key}-mid" type="number" value="${cfg.thresholds[1]}"
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;
+                   background:var(--surface0);border:1.5px solid var(--surface1);
+                   border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem;" />
+        </label>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSettings() {
+  const panel = document.getElementById('settings-panel');
+  const visible = panel.style.display === 'flex';
+  panel.style.display = visible ? 'none' : 'flex';
+  if (!visible) buildThresholdForm();
+}
+
+function saveThresholds() {
+  Object.keys(SENSORS).forEach(key => {
+    const low = parseFloat(document.getElementById('thr-'+key+'-low').value);
+    const mid = parseFloat(document.getElementById('thr-'+key+'-mid').value);
+    if (!isNaN(low) && !isNaN(mid) && low < mid) {
+      SENSORS[key].thresholds = [low, mid];
+
+      // Update threshold display on cards
+      const unit = SENSORS[key].unit;
+      document.getElementById(`param-${key}-min`).textContent = low + unit;
+      document.getElementById(`param-${key}-max`).textContent = mid + unit;
+    }
+  });
+  toggleSettings();
+  updateDashboard();
+}
+
+/* ─── CHART INITIALIZATION ─────────────────────────────────────── */
+function initCharts() {
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        labels: { color: '#cdd6f4', font: { family: "'Space Grotesk', Arial, sans-serif" } }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { color: '#a6adc8' }, grid: { color: '#313244' } },
+      x: { ticks: { color: '#a6adc8' }, grid: { color: '#313244' } }
+    }
+  };
+
+  // Temperature Chart
+  const ctxTemp = document.getElementById('chartTemp').getContext('2d');
+  chartTemp = new Chart(ctxTemp, {
+    type: 'line',
+    data: {
+      labels: sensorHistory.labels,
+      datasets: [{
+        label: SENSORS.temp.label,
+        data: sensorHistory.temp,
+        borderColor: CHART_COLORS.temp.border,
+        backgroundColor: CHART_COLORS.temp.bg,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: CHART_COLORS.temp.border,
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Humidity Chart
+  const ctxHum = document.getElementById('chartHum').getContext('2d');
+  chartHum = new Chart(ctxHum, {
+    type: 'line',
+    data: {
+      labels: sensorHistory.labels,
+      datasets: [{
+        label: SENSORS.hum.label,
+        data: sensorHistory.hum,
+        borderColor: CHART_COLORS.hum.border,
+        backgroundColor: CHART_COLORS.hum.bg,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: CHART_COLORS.hum.border,
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Light Chart
+  const ctxLight = document.getElementById('chartLight').getContext('2d');
+  chartLight = new Chart(ctxLight, {
+    type: 'line',
+    data: {
+      labels: sensorHistory.labels,
+      datasets: [{
+        label: SENSORS.light.label,
+        data: sensorHistory.light,
+        borderColor: CHART_COLORS.light.border,
+        backgroundColor: CHART_COLORS.light.bg,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: CHART_COLORS.light.border,
+      }]
+    },
+    options: chartOptions
+  });
+
+  // Sound Chart
+  const ctxSound = document.getElementById('chartSound').getContext('2d');
+  chartSound = new Chart(ctxSound, {
+    type: 'line',
+    data: {
+      labels: sensorHistory.labels,
+      datasets: [{
+        label: SENSORS.sound.label,
+        data: sensorHistory.sound,
+        borderColor: CHART_COLORS.sound.border,
+        backgroundColor: CHART_COLORS.sound.bg,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: CHART_COLORS.sound.border,
+      }]
+    },
+    options: chartOptions
+  });
+}
+
+function addToHistory(data) {
+  const now = new Date();
+  const timeLabel = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  
+  sensorHistory.labels.push(timeLabel);
+  sensorHistory.temp.push(data.temp);
+  sensorHistory.hum.push(data.hum);
+  sensorHistory.light.push(data.light);
+  sensorHistory.sound.push(data.sound);
+
+  // Keep only last MAX_DATA_POINTS
+  if (sensorHistory.labels.length > MAX_DATA_POINTS) {
+    sensorHistory.labels.shift();
+    sensorHistory.temp.shift();
+    sensorHistory.hum.shift();
+    sensorHistory.light.shift();
+    sensorHistory.sound.shift();
+  }
+
+  // Update all charts
+  if (chartTemp) {
+    chartTemp.data.labels = sensorHistory.labels;
+    chartTemp.data.datasets[0].data = sensorHistory.temp;
+    chartTemp.update();
+  }
+  if (chartHum) {
+    chartHum.data.labels = sensorHistory.labels;
+    chartHum.data.datasets[0].data = sensorHistory.hum;
+    chartHum.update();
+  }
+  if (chartLight) {
+    chartLight.data.labels = sensorHistory.labels;
+    chartLight.data.datasets[0].data = sensorHistory.light;
+    chartLight.update();
+  }
+  if (chartSound) {
+    chartSound.data.labels = sensorHistory.labels;
+    chartSound.data.datasets[0].data = sensorHistory.sound;
+    chartSound.update();
+  }
+}
+
+function downloadDataAsCSV() {
+  if (sensorHistory.labels.length === 0) {
+    alert('Tidak ada data untuk diunduh. Tunggu beberapa saat sampai ada pembacaan sensor.');
+    return;
+  }
+
+  // Create CSV content
+  let csv = 'Waktu (Jam:Menit:Detik),Suhu (°C),Kelembapan (%),Cahaya (lux),Suara (dB)\n';
+  
+  for (let i = 0; i < sensorHistory.labels.length; i++) {
+    const row = [
+      sensorHistory.labels[i],
+      sensorHistory.temp[i] || '',
+      sensorHistory.hum[i] || '',
+      sensorHistory.light[i] || '',
+      sensorHistory.sound[i] || ''
+    ].join(',');
+    csv += row + '\n';
+  }
+
+  // Create and trigger download
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', `sensor-data-${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+
+
+/* ─── INIT ──────────────────────────────────────────────────────── */
+(async () => {
+  initCharts();
+  await updateDashboard();
+  setInterval(async () => {
+    let data;
+    try { data = await readSensor(); }
+    catch(e) {
+      return;
+    }
+    
+    // Add data to history for charts
+    addToHistory(data);
+    
+    await updateDashboard();
+  }, 1);
+})();
+</script>
+</body>
+
+</html>
