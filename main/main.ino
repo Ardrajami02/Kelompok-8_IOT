@@ -32,12 +32,12 @@
 
 // // GLOBAL VAR // //
 
-const char* GC_WINAME[] = {"Kayasip "}; // tambahkan wifi terus, beserta dengan pwnya
-const char* GC_WIPASSWORD[] = {"raffi123"};
+const char* GC_WINAME[] = {"HOTSPOT@UPNJATIM.AC.ID"}; // tambahkan wifi terus, beserta dengan pwnya
+const char* GC_WIPASSWORD[] = {"belanegara"};
 
-IPAddress staticIP(192, 168, 1, 150);
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
+// IPAddress staticIP(172, 27, 205, 150);
+// IPAddress gateway(172, 27, 205, 1);
+// IPAddress subnet(255, 255, 255, 0);
 
 // nanti implementasinya hanya for (int i = 0; i < sizeof(GC_WINAME) / sizeof(GC_WINAME[0]);i++){ GC_WINAME[i]; GC_WIPASSWORD[i]; }
 
@@ -65,8 +65,8 @@ setup() {
   }
 
 
-  WiFi.mode(WIFI_STA);
-  WiFi.config(staticIP, gateway, subnet);
+  // WiFi.mode(WIFI_STA);
+  // WiFi.config(staticIP, gateway, subnet);
 
   int timeout = 0;
   while (WiFi.status() != WL_CONNECTED && timeout < 20) {
@@ -92,7 +92,7 @@ loop() {
   server.handleClient();
 
   if (WiFi.status() == WL_CONNECTED) {
-    // Serial.println(WiFi.localIP());
+    Serial.println(WiFi.localIP());
     gettingToBlinky(2, 100);
   }
   delay(10);
